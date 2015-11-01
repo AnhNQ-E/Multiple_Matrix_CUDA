@@ -54,4 +54,26 @@ __global__ void matrixMul( int *DA, int *DB, int *DC)
 
 }
 
+__global__ void MatrixMulKernel(int* Md, int* Nd, int* Pd, int thr, int col, int row)
+{
+// 2D Thread ID
+int tx = threadIdx.x; // 
+int bx = blockIdx.x;  // 
+// Pvalue stores the Pd element that is computed by the thread
+int Pvalue = 0;
+
+for (int k = 0; k < thr; k++)
+{
+Pvalue += Md[tx * thr + k] * Nd[k + bx*thr];
+}
+// Write the matrix to device memory each thread writes one element
+Pd[tx*col+bx] = Pvalue;
+}
+
+__global__ void add(int *da,	int *db,	int *dc){
+	int index = threadIdx.x + blockIdx.x * blockDim.x;
+	dc[index] = da[index] + db[index];
+
+	__syncthreads();
+}
 #endif
